@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TheCreator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 3rem;
+            color: #333;
+            margin-bottom: 20px;
+            animation: fadeIn 1s ease-out;
+        }
+
+        .controls {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 5px;
+            background-color: #007BFF;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0, 123, 255, 0.3);
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+            transform: scale(1.05);
+        }
+
+        #previewArea {
+            border: 2px solid #ccc;
+            width: 90vw;
+            height: 70vh;
+            background-color: white;
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+            animation: fadeIn 1.2s ease-out;
+        }
+
+        #pageTitle {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #555;
+            animation: slideIn 0.8s ease-out;
+        }
+
+        .watermark {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            opacity: 0.05;
+            font-size: 50px;
+            color: #333;
+            pointer-events: none;
+        }
+
+        #contextMenu {
+            display: none;
+            position: absolute;
+            background: white;
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        #contextMenu button {
+            width: 180px;
+            padding: 10px;
+            border: none;
+            background: none;
+            font-size: 1rem;
+            color: #333;
+            cursor: pointer;
+            text-align: left;
+        }
+
+        #contextMenu button:hover {
+            background-color: #f0f0f0;
+        }
+
+        .language-selector {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        select {
+            padding: 10px;
+            border: 2px solid #007BFF;
+            border-radius: 5px;
+            font-size: 1.1rem;
+            cursor: pointer;
+        }
+
+        /* Animações */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<h1>TheCreator</h1>
+<div class="controls">
+    <button id="export">Exportar HTML</button>
+</div>
+<div id="pageTitle">Página</div>
+<div id="previewArea"></div>
+<div class="watermark">TheCreator</div>
+
+<!-- Menu de contexto moderno -->
+<div id="contextMenu">
+    <button id="addText">Adicionar Texto</button>
+    <button id="addButton">Adicionar Botão</button>
+    <button id="addImage">Adicionar Imagem</button>
+    <button id="addHtml">Adicionar HTML</button>
+    <button id="addCode">Adicionar Código</button>
+    <button id="newPage">Nova Página</button>
+</div>
+
+<!-- Seletor de idioma -->
+<div class="language-selector">
+    <label for="language">Idioma:</label>
+    <select id="language">
+        <option value="pt">Português</option>
+        <option value="en">English</option>
+        <option value="es">Español</option>
+    </select>
+</div>
+
+<script>
+    const previewArea = document.getElementById('previewArea');
+    const pageTitle = document.getElementById('pageTitle');
+    const exportButton = document.getElementById('export');
+    const contextMenu = document.getElementById('contextMenu');
+    let pageCount = 1;
+
+    // Dicionário de traduções
+    const translations = {
+        pt: {
+            export: "Exportar HTML",
+            pageTitle: "Página",
+            addText: "Adicionar Texto",
+            addButton: "Adicionar Botão",
+            addImage: "Adicionar Imagem",
+            addHtml: "Adicionar HTML",
+            addCode: "Adicionar Código",
+            newPage: "Nova Página"
+        },
+        en: {
+            export: "Export HTML",
+            pageTitle: "Page",
+            addText: "Add Text",
+            addButton: "Add Button",
+            addImage: "Add Image",
+            addHtml: "Add HTML",
+            addCode: "Add Code",
+            newPage: "New Page"
+        },
+        es: {
+            export: "Exportar HTML",
+            pageTitle: "Página",
+            addText: "Añadir Texto",
+            addButton: "Añadir Botón",
+            addImage: "Añadir Imagen",
+            addHtml: "Añadir HTML",
+            addCode: "Añadir Código",
+            newPage: "Nueva Página"
+        }
+    };
+
+    // Função para trocar o idioma
+    function changeLanguage(lang) {
+        document.getElementById('export').innerText = translations[lang].export;
+        pageTitle.innerText = translations[lang].pageTitle + ` ${pageCount}`;
+        document.getElementById('addText').innerText = translations[lang].addText;
+        document.getElementById('addButton').innerText = translations[lang].addButton;
+        document.getElementById('addImage').innerText = translations[lang].addImage;
+        document.getElementById('addHtml').innerText = translations[lang].addHtml;
+        document.getElementById('addCode').innerText = translations[lang].addCode;
+        document.getElementById('newPage').innerText = translations[lang].newPage;
+    }
+
+    // Atualiza idioma ao trocar o seletor
+    document.getElementById('language').addEventListener('change', function() {
+        const selectedLang = this.value;
+        changeLanguage(selectedLang);
+    });
+
+    // Função para adicionar texto com animação
+    document.getElementById('addText').addEventListener('click', function() {
+        const textContent = prompt("Digite seu texto:");
+        if (textContent) {
+            const div = document.createElement('div');
+            div.innerText = textContent;
+            div.style.position = "absolute";
+            div.style.top = Math.random() * 300 + "px";
+            div.style.left = Math.random() * 600 + "px";
+            div.style.animation = "fadeIn 0.5s ease-out";
+            previewArea.appendChild(div);
+        }
+        hideContextMenu();
+    });
+
+    // Função para adicionar botão com animação
+    document.getElementById('addButton').addEventListener('click', function() {
+        const buttonText = prompt("Digite o texto do botão:");
+        const buttonUrl = prompt("Digite a URL para onde o botão deve levar:");
+        if (buttonText && buttonUrl) {
+            const button = document.createElement('button');
+            button.innerText = buttonText;
+            button.onclick = () => window.open(buttonUrl, '_blank');
+            button.style.position = "absolute";
+            button.style.top = Math.random() * 300 + "px";
+            button.style.left = Math.random() * 600 + "px";
+            button.style.animation = "fadeIn 0.5s ease-out";
+            previewArea.appendChild(button);
+        }
+        hideContextMenu();
+    });
+
+    // Função para adicionar imagem com animação
+    document.getElementById('addImage').addEventListener('click', function() {
+        const imageUrl = prompt("Cole a URL da imagem:");
+        if (imageUrl) {
+            const img = document.createElement('img');
+            img.src = imageUrl;
+            img.style.position = "absolute";
+            img.style.top = Math.random() * 300 + "px";
+            img.style.left = Math.random() * 600 + "px";
+            img.style.animation = "fadeIn 0.5s ease-out";
+            previewArea.appendChild(img);
+        }
+        hideContextMenu();
+    });
+
+    // Função para adicionar nova página
+    document.getElementById('newPage').addEventListener('click', function() {
+        pageCount++;
+        pageTitle.innerText = `Página ${pageCount}`;
+        previewArea.innerHTML = ''; // Limpa a área de visualização para nova página
+        hideContextMenu();
+    });
+
+    // Função para exportar HTML
+    exportButton.addEventListener('click', function() {
+        let elements = previewArea.innerHTML;
+        const htmlContent = `
+        <!DOCTYPE html>
+        <html lang="pt-BR">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Exported Page</title>
+            <style>
+                body { font-family: 'Montserrat', sans-serif; }
+            </style>
+        </head>
+        <body>
+            ${elements}
+            <div class="watermark">TheCreator</div>
+        </body>
+        </html>
+        `;
+        const blob = new Blob([htmlContent], { type: 'text/html' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = "exported_page.html";
+        link.click();
+    });
+
+    // Função para exibir o menu de contexto
+    previewArea.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+        contextMenu.style.left = `${e.pageX}px`;
+        contextMenu.style.top = `${e.pageY}px`;
+        contextMenu.style.display = "block";
+    });
+
+    // Função para ocultar o menu de contexto
+    function hideContextMenu() {
+        contextMenu.style.display = "none";
+    }
+
+    // Fecha o menu se clicar fora
+    document.addEventListener('click', function() {
+        hideContextMenu();
+    });
+</script>
+
+</body>
+</html>
